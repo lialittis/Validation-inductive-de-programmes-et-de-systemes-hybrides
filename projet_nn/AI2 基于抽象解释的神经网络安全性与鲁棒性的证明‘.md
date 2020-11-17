@@ -1,0 +1,93 @@
+# AI2: 基于抽象解释的神经网络完全性与鲁棒性的证明
+
+## 1. Write at first
+
+软件测试：对任何一个简单的程序，我们都需要用到大量的软件用例来验证程序的正确性。
+
+corner case：我们编写的算法中往往存在不少的corner case，我们需要使用更有代表性的测试，来覆盖掉这些corner case。
+
+自动化测试：随着程序的复杂度的提高，仅靠人力，很难以覆盖全部的corner case。我们需要借助脚本来进行自动化测试，意图覆盖全部的输入控件，并捕捉所有的异常行为。
+
+但是，面对指数级甚至是组合数级别爆炸式增长的输入空间，即使穷尽所有的计算资源，我们也无法在有限的时间内进行完全部的测试。
+
+抽象化方法：软件工程中的“软件测试”实际上时一个高度抽象化的领域，实际上就是想解决庞大的输入空间下的测试问题。简单的穷举遍历已经无法实现，我们转而求助抽象化方法，在大幅度减少测试所用时间的同时，仍能较为准确的保证程序的正确性。
+
+深度神经网络：近些年，以深度神经网络为代表的人工智能飞速发展，但是神经网络面对扰动会异常脆弱。例如DeepFool的相关工作发现，只要在图像上加上一些人为不可见的随机噪点，就很有可能使神经网络的分类结果发生改变。——问题来了，如何保证深度学习在一些安全要求高的场景保持足够的鲁棒性呢？
+
+问题：
+1. 神经网络的输入空间比一般的复杂程序要高太多。
+2. 神经网络高度抽象，而且没有一般程序的控制流结构。且神经网络各层的符合会导致整个系统的表现使非线性的，一般软件测试领域的抽象化方法很难适用。
+
+## 背景知识
+
+### 软件测试与静态分析
+
+软件测试分类：
+1. 运行时 run-time：通过跑测试用例来对程序进行分析。
+2. 静态 static：在程序运行前就可以对程序进行分析，找出bug。
+
+静态分析
+
+Sound approximation -> sound & complete (truth) -> complete approximation
+
+Rice 定理： Any non-trivial property of the behavior of programs in a re. language is undecidable r.e. language: recognizable by a Turing-machine
+
+任何我们感兴趣的软件性质，都是“不可判定”问题。
+
+### 抽象解释（Abstract Interpretation）
+
+简单理解，抽象解释是把“实例”中的对象抽象到抽象空间中。这种抽象的显著优势就是，能够极大的缩小空间的尺度。
+
+1. 定义两个空间 - 实例域和抽象域
+2. 定义抽象->实例，实例->抽象的转换函数
+3. 定在在抽象空间上的函数运算
+
+抽象解释虽然可以保证正确性，但是可能会出现不准确性。
+
+任何一种抽象都会损失部分信息，一个抽象解释设计的越好，消耗越低，准度越高。
+
+#### 转换函数
+
+Preservation theorem: If property (ACTL*) holds on abstract model, it holds on concrete model. (Clarke, Grumbery, Long)
+
+我们只要分析abstract modle（在抽象域上做运算），发现一种性质在抽象域上成立，就能断言，该性质在实例域上也成立。但是如果在abstract model 上不成立，无法断言其在concrete model上也不成立。
+
+#### 运算函数（Abstract Transformers）
+
+转换函数是指：$\alpha$ (abstraction function) and $\gamma$ (concretization function)；运算函数是Abstract Transformers。
+
+抽象解释要求函数$F\maozi D->D$满足两个条件：
+1. 单调
+2. $\forall x \in D : \alpha \circledcirc F(x) pianxu F\maozi \circledcirc \alpha(x)$
+
+## Paper 内容
+
+### Overview
+
+将神经网络的运算使用仿射变换来表示，以使用抽象解释来对神经网络进行静态分析。基于“过估计”的静态分析可以保证：只要通过AI2的测试，就能证明神经网络在相应攻击下局游鲁棒性和安全性。由于是在抽象域上进行的运算，该工作显著减少了测试所用时间，大幅超越了现有的工作，并取得了不错的精度。
+
+该工作主要分为以下两个关键部分：
+1. 将神经网络的运算用仿射变换（即矩阵运算）来表示
+2. 基于以仿射变换表示的神经网络，定义抽象域，定义抽象域的转换函数，定义基于抽象域的运算，并基于此进行分析。其中，抽象域的运算就是在1中定义好的放射运算。
+
+#### 仿射变换
+
+神经网络的激活函数，全连接层，卷积层，Max pooling层均可以使用带条件的仿射变换（conditional affine transfaormations, namely CAT）。所谓的带条件的仿射变换，实际上可以理解为，带条件判断的矩阵运算。现对神经网络各部分进行说明：
+
+**Reshape**
+
+为了表示方便，在处理输入时，会把三维的矩阵$\bar{x} \in \mathcal{R}^{m\times n\times r}$ 转换为一维向量$\bar{x}^v \in \mathcal{R}^{mnr}$
+
+**激活函数**
+
+1）原始计算定义
+
+
+
+
+
+
+
+
+
+
